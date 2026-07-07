@@ -1,0 +1,27 @@
+{
+  "rmse_cv": 0.5675126935542477,
+  "std_rmse": 0.00542855045206428,
+  "fold_rmses": [
+    0.5651180578144421,
+    0.5661876857343277,
+    0.5616147228658364,
+    0.5777446254163934,
+    0.5668983759402386
+  ],
+  "params": {
+    "learning_rate": 0.012292573749453549,
+    "num_leaves": 183,
+    "max_depth": 12,
+    "min_child_samples": 5,
+    "subsample": 0.7448928146288163,
+    "colsample_bytree": 0.6516687915463434,
+    "reg_alpha": 4.360788189009667e-05,
+    "reg_lambda": 7.899774207738307e-07
+  },
+  "trial_number": 173,
+  "n_trials_total": 200,
+  "beats_threshold": false,
+  "threshold": 0.563,
+  "current_rmse": 0.5686,
+  "current_std": 0.0055
+}
