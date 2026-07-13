@@ -33,6 +33,8 @@ Predecir el rating promedio (`average`) de juegos de mesa de BoardGameGeek (BGG)
 pip install -r requirements.txt
 ```
 
+Métricas verificadas reproducibles con las versiones de `requirements-lock.txt` (Python 3.12).
+
 ### 2. Descargar datos
 
 ```bash
