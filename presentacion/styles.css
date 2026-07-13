@@ -1436,6 +1436,19 @@ code {
    CONTADORES GRANDES — modelo final
 ═══════════════════════════════════════════════════════════════ */
 
+.model-banner {
+  font-size: clamp(0.95rem, 1.8vw, 1.1rem);
+  color: var(--text-mid);
+  line-height: 1.5;
+  margin-bottom: clamp(1rem, 2.5vh, 1.75rem);
+}
+
+.model-banner__name {
+  font-weight: 800;
+  color: var(--text);
+  font-size: 1.2em;
+}
+
 .counter-trio {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
