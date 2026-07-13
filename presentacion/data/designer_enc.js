@@ -1,0 +1,2 @@
+// Generado desde notebooks -- no editar a mano
+window.DATA_DESIGNER_ENC = {"cv_delta": -0.0158, "holdout_delta": 0.0886, "pct_new_designers": 29.5, "coverage": [{"group": "all_seen", "label": "Todos conocidos", "n": 1388, "pct": 61.9, "rmse_base": 0.6166, "rmse_f8": 0.6049}, {"group": "partial", "label": "Parcial", "n": 192, "pct": 8.6, "rmse_base": 0.7163, "rmse_f8": 0.7168}, {"group": "none_seen", "label": "Ninguno conocido", "n": 661, "pct": 29.5, "rmse_base": 0.6372, "rmse_f8": 0.9159}]};

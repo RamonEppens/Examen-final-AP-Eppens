@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Predicción de Ratings BGG · Análisis Predictivo · ITBA 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Indicador de progreso -- 1 segmento por acto, poblado por script.js -->
+  <nav class="deck-progress" id="deck-progress" aria-label="Progreso de la presentación"></nav>
+
+  <!-- Overview ("O") -- grilla de todos los pasos, poblada por script.js -->
+  <div class="overview-grid" id="overview-grid" aria-hidden="true"></div>
+
+  <!-- Pista de teclado -- se atenúa tras la primera interacción -->
+  <div class="deck-hint" id="deck-hint" aria-hidden="true">
+    <span><kbd>&crarr;</kbd> avanza</span>
+    <span><kbd>&larr;</kbd> vuelve</span>
+    <span><kbd>O</kbd> overview</span>
+    <span><kbd>A</kbd> anexo</span>
+  </div>
+
+  <main id="deck">
+
+    <!-- ══════════════════════════════════════════════════════════
+         S1 — HERO  (caso de negocio, parte 1)
+    ══════════════════════════════════════════════════════════ -->
+    <section class="section step section--hero" id="s-hero" data-act="01" data-label="Inicio">
+      <div class="container container--centered">
+
+        <p class="eyebrow reveal">Análisis Predictivo &middot; ITBA &middot; 2026</p>
+
+        <h1 class="hero-title reveal">
+          ¿Podemos saber si un juego<br class="br-lg" />
+          de mesa va a triunfar?
+        </h1>
+
+        <p class="hero-sub reveal">
+          Rating BGG antes del lanzamiento, solo con datos de diseño.
+        </p>
+
+        <div class="hero-meta reveal">
+          <span class="meta-pill">LightGBM</span>
+          <span class="meta-pill">RMSE&nbsp;0.64</span>
+          <span class="meta-pill">92 features</span>
+        </div>
+
+        <div class="scroll-hint reveal" aria-hidden="true">
+          <svg width="22" height="36" viewBox="0 0 22 36" fill="none">
+            <rect x="1.5" y="1.5" width="19" height="33" rx="9.5" stroke="currentColor" stroke-width="1.4"/>
+            <circle class="scroll-dot" cx="11" cy="11" r="3" fill="currentColor"/>
+          </svg>
+          <span>tocá o presioná Enter para continuar</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         S1b — EL PROBLEMA  (caso de negocio, parte 2) — 01
+    ══════════════════════════════════════════════════════════ -->
+    <section class="section step" id="s-problema" data-act="01" data-label="El problema">
+      <div class="container">
+
+        <div class="section-header reveal">
+          <span class="section-num">01</span>
+          <h2 class="section-title">El problema</h2>
+        </div>
+
+        <p class="impact-line reveal">
+          El rating BGG aparece <span class="accent-text">después</span> del lanzamiento.
+        </p>
+
+        <div class="card-grid reveal">
+
+          <div class="card">
+            <div class="card-icon">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                <rect x="2.5" y="2.5" width="23" height="23" rx="5" stroke="currentColor" stroke-width="1.6"/>
+                <circle cx="8.5"  cy="8.5"  r="2" fill="currentColor"/>
+                <circle cx="19.5" cy="8.5"  r="2" fill="currentColor"/>
+                <circle cx="8.5"  cy="19.5" r="2" fill="currentColor"/>
+                <circle cx="19.5" cy="19.5" r="2" fill="currentColor"/>
+              </svg>
+            </div>
+            <p class="card-label">Editores</p>
+            <p class="card-body">Estimar potencial antes de producir</p>
+          </div>
+
+          <div class="card">
+            <div class="card-icon">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                <circle cx="14" cy="14" r="11" stroke="currentColor" stroke-width="1.6"/>
+                <polyline points="14,8 14,14 18,17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <p class="card-label">El ranking BGG</p>
+            <p class="card-body">Tarda años en estabilizarse</p>
+          </div>
+
+          <div class="card">
+            <div class="card-icon">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                <path d="M14 3 L16.5 10.5 L24 10.5 L18 15.5 L20 23 L14 18.5 L8 23 L10 15.5 L4 10.5 L11.5 10.5 Z"
+                      stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <p class="card-label">La oportunidad</p>
+            <p class="card-body">Mecánicas y complejidad predicen el rating</p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         ACTO 3 — LA MATERIA PRIMA
+    ══════════════════════════════════════════════════════════ -->
+    <section class="section step" id="s-acto3" data-act="03" data-label="La materia prima" data-stages="4">
+      <div class="container">
+
+        <div class="section-header reveal">
+          <span class="section-num">03</span>
+          <h2 class="section-title">30.000 veredictos, 30.000 fichas.</h2>
+        </div>
+
+        <div class="pipeline-flow-wrap" id="pipeline-merge" role="img"
+             aria-label="Pipeline de datos: el veredicto de la comunidad en GitHub y la ficha técnica de la API oficial de BGG, unidos por ID"></div>
+
+        <div class="pipeline-steps">
+          <div class="pipeline-step reveal-manual">
+            <p>
+              El ranking diario de BGG: el <strong class="accent-text">VEREDICTO</strong> de la
+              comunidad (rating de 30.864 juegos)… pero nada sobre cómo es cada juego.
+            </p>
+          </div>
+          <div class="pipeline-step reveal-manual">
+            <p>
+              La API oficial de BGG: la <strong class="accent-text">FICHA</strong> de cada juego
+              (complejidad, mecánicas, jugadores, duración). App registrada y aprobada.
+            </p>
+          </div>
+          <div class="pipeline-step reveal-manual">
+            <p>Veredicto + ficha, unidos juego por juego <strong class="accent-text">por ID</strong>.</p>
+          </div>
+        </div>
+
+        <div class="count-flow reveal-manual">
+          <div class="hc-col">
+            <span class="hc-label">Semilla</span>
+            <span class="hc-val hc-val--big countup" data-target="30864" data-duration="1200">0</span>
+          </div>
+          <div class="hc-arrow" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <line x1="3" y1="10" x2="15" y2="10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              <polyline points="11,6 15,10 11,14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="hc-col">
+            <span class="hc-label">Únicos</span>
+            <span class="hc-val countup" data-target="30752" data-duration="1300">0</span>
+          </div>
+          <div class="hc-arrow" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <line x1="3" y1="10" x2="15" y2="10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              <polyline points="11,6 15,10 11,14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="hc-col">
+            <span class="hc-label">Confiables</span>
+            <span class="hc-val hc-val--big hc-val--alt countup" data-target="24251" data-duration="1700">0</span>
+          </div>
+        </div>
+
+        <div class="chip-row reveal-manual">
+          <span class="chip">−112 duplicados</span>
+          <span class="chip">−379 años inválidos</span>
+          <span class="chip">−6.122 con pocos votos</span>
+        </div>
+
+        <p class="one-liner reveal-manual">
+          La API cambió sus reglas a mitad del proyecto — el pipeline se adaptó.
+        </p>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         ACTO 3b — EL DATASET POR DENTRO — cierre de la sección de
+         datos, cargado desde presentacion/data/sample_row.js
+    ══════════════════════════════════════════════════════════ -->
+    <section class="section step" id="s-acto3-sample" data-act="03" data-label="El dataset por dentro">
+      <div class="container" style="max-width:920px;">
+
+        <div class="section-header reveal">
+          <span class="section-num">03</span>
+          <h2 class="section-title">El dataset por dentro</h2>
+        </div>
+
+        <div class="sample-card reveal" id="sample-card"></div>
+
+        <div class="schema-grid reveal" id="schema-grid"></div>
+
+        <p class="one-liner reveal" id="sample-footer"></p>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         ACTO 4 — CONOCER EL TERRENO (EDA)
+    ══════════════════════════════════════════════════════════ -->
+    <section class="narrative-screen step" id="s-acto4-intro" data-act="04" data-label="Conocer el terreno">
+      <div class="narrative-inner">
+        <span class="narrative-eyebrow reveal">Acto 04</span>
+        <p class="narrative-big reveal">Antes de predecir, entender.</p>
+      </div>
+    </section>
+
+    <!-- 4a — ¿Todos los ratings valen lo mismo? -->
+    <section class="section step" id="s-acto4a" data-act="04" data-label="EDA — ¿todos los ratings valen lo mismo?" data-stages="2">
+      <div class="container">
+        <span class="eda-tag reveal">04 &middot; 1 / 4</span>
+        <h2 class="eda-question reveal">¿Todos los ratings valen lo mismo?</h2>
+
+        <div class="chart-svg-wrap reveal" id="chart-funnel"></div>
+
+        <div class="eda-resolution reveal-manual">
+          <p class="eda-answer">Con pocos votos, el rating es ruido.</p>
+          <div class="eda-decision">
+            <svg class="decision-mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <circle cx="10" cy="10" r="8.5" stroke="currentColor" stroke-width="1.6"/>
+              <polyline points="6,10.2 8.7,13 14,7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="eda-decision__text"><strong>Decisión —</strong> solo juegos con ≥50 votos.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4b — ¿La vara es estable en el tiempo? -->
+    <section class="section step" id="s-acto4b" data-act="04" data-label="EDA — ¿la vara es estable en el tiempo?" data-stages="2">
+      <div class="container">
+        <span class="eda-tag reveal">04 &middot; 2 / 4</span>
+        <h2 class="eda-question reveal">¿La vara es estable en el tiempo?</h2>
+
+        <div class="chart-svg-wrap reveal" id="chart-temporal"></div>
+
+        <div class="eda-resolution reveal-manual">
+          <p class="eda-answer">BGG puntúa cada vez más alto: 6.0 → 7.5.</p>
+          <div class="eda-decision">
+            <svg class="decision-mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <circle cx="10" cy="10" r="8.5" stroke="currentColor" stroke-width="1.6"/>
+              <polyline points="6,10.2 8.7,13 14,7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="eda-decision__text"><strong>Decisión —</strong> el modelo se evaluará contra el futuro.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4c — ¿Qué pesa más en el rating? -->
+    <section class="section step" id="s-acto4c" data-act="04" data-label="EDA — ¿qué pesa más en el rating?" data-stages="2">
+      <div class="container">
+        <span class="eda-tag reveal">04 &middot; 3 / 4</span>
+        <h2 class="eda-question reveal">¿Qué pesa más en el rating?</h2>
+
+        <div class="chart-svg-wrap reveal" id="chart-weight-avg"></div>
+
+        <div class="eda-resolution reveal-manual">
+          <p class="eda-answer">La complejidad manda: ρ = 0.55.</p>
+          <div class="eda-decision">
+            <svg class="decision-mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <circle cx="10" cy="10" r="8.5" stroke="currentColor" stroke-width="1.6"/>
+              <polyline points="6,10.2 8.7,13 14,7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="eda-decision__text"><strong>Decisión —</strong> feature central del modelo.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4d — ¿Los juegos modernos son más complejos? -->
+    <section class="section step" id="s-acto4d" data-act="04" data-label="EDA — ¿los juegos modernos son más complejos?" data-stages="2">
+      <div class="container">
+        <span class="eda-tag reveal">04 &middot; 4 / 4</span>
+        <h2 class="eda-question reveal">¿Los juegos modernos son más complejos?</h2>
+
+        <div class="chart-svg-wrap reveal" id="chart-year-weight"></div>
+
+        <div class="eda-resolution reveal-manual">
+          <p class="eda-answer">No. Los juegos no cambiaron — la comunidad puntúa distinto.</p>
+          <div class="eda-decision">
+            <svg class="decision-mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <circle cx="10" cy="10" r="8.5" stroke="currentColor" stroke-width="1.6"/>
+              <polyline points="6,10.2 8.7,13 14,7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="eda-decision__text"><strong>Decisión —</strong> el año es sesgo de la vara, no evolución del producto.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         S5 — EVALUACIÓN — 05
+    ══════════════════════════════════════════════════════════ -->
+    <section class="section step" id="s-evaluacion" data-act="05" data-label="Evaluación">
+      <div class="container">
+
+        <div class="section-header reveal">
+          <span class="section-num">05</span>
+          <h2 class="section-title">Evaluación</h2>
+        </div>
+
+        <div class="timeline-split reveal">
+          <div class="ts-labels">
+            <div class="ts-label">
+              <span class="ts-label__n countup" data-target="22010" data-duration="1300">0</span>
+              <span class="ts-label__range">train &middot; ≤ 2023</span>
+            </div>
+            <div class="ts-label ts-label--holdout">
+              <span class="ts-label__n ts-label__n--holdout countup" data-target="2241" data-duration="1300">0</span>
+              <span class="ts-label__range">holdout &middot; 2024–2026</span>
+            </div>
+          </div>
+          <div class="ts-track" aria-hidden="true">
+            <div class="ts-seg ts-seg--train" data-width="90.76"></div>
+            <div class="ts-seg ts-seg--holdout" data-width="9.24"></div>
+          </div>
+        </div>
+
+        <p class="one-liner reveal">
+          Se evalúa como en producción: prediciendo el futuro.
+        </p>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         S6 — SELECCIÓN DE MODELOS — 06
+    ══════════════════════════════════════════════════════════ -->
+    <section class="section step" id="s-seleccion" data-act="06" data-label="Selección de modelos">
+      <div class="container">
+
+        <div class="section-header section-header--tight reveal">
+          <span class="section-num">06</span>
+          <h2 class="section-title">Selección de modelos</h2>
+        </div>
+
+        <p class="metric-note reveal">
+          RMSE = raíz del error cuadrático medio: √(promedio de (real − predicho)²) — el error típico, en puntos de rating. Menor es mejor.
+        </p>
+
+        <div class="bar-rows reveal" id="bars-ladder"></div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         S6b — SEGUNDA RONDA DE FEATURES — continúa el acto 06
+    ══════════════════════════════════════════════════════════ -->
+    <section class="section step" id="s-acto6-features" data-act="06" data-label="Segunda ronda: ingeniería de features">
+      <div class="container">
+
+        <div class="section-header section-header--tight reveal">
+          <span class="section-num">06</span>
+          <h2 class="section-title">Segunda ronda: ingeniería de features</h2>
+        </div>
+
+        <div class="feature-round-grid reveal">
+          <div class="feature-round-col feature-round-col--positive">
+            <span class="feature-round-col__label">Quedaron ✓</span>
+            <div class="chip-row chip-row--stack">
+              <span class="chip chip--positive">ratio de duración</span>
+              <span class="chip chip--positive">rango de jugadores</span>
+              <span class="chip chip--positive">10 familias de mecánicas</span>
+            </div>
+          </div>
+          <div class="feature-round-col feature-round-col--negative">
+            <span class="feature-round-col__label">Descartadas ✗</span>
+            <div class="chip-row chip-row--stack">
+              <span class="chip chip--negative">interacciones explícitas</span>
+              <span class="chip chip--negative">weight²</span>
+              <span class="chip chip--negative">flag de faltantes</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="one-liner reveal">Criterio: solo se queda lo que mejora de forma robusta.</p>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         S7 — DESIGNER_ENC — narrativa en 3 pantallas — 07
+    ══════════════════════════════════════════════════════════ -->
+    <section class="narrative-screen narrative-screen--positive step" id="s-designer-1" data-act="06" data-label="designer_enc — CV">
+      <div class="narrative-inner">
+        <span class="narrative-eyebrow reveal">07 &middot; designer_enc</span>
+        <p class="narrative-big reveal">CV: −0.015 ✓</p>
+        <p class="narrative-detail reveal">Δ RMSE en validación cruzada (5 folds sobre ≤2023): el error baja 0.015 puntos al agregar la feature.</p>
+      </div>
+    </section>
+
+    <section class="narrative-screen narrative-screen--negative step" id="s-designer-2" data-act="06" data-label="designer_enc — holdout">
+      <div class="narrative-inner">
+        <p class="narrative-big reveal">Holdout: +0.089 ✗</p>
+        <p class="narrative-detail reveal">Δ RMSE contra juegos 2024-2026: el error SUBE 0.089 puntos — la feature empeora el futuro.</p>
+        <span class="narrative-chip reveal">29,5% de diseñadores nuevos</span>
+      </div>
+    </section>
+
+    <section class="narrative-screen step" id="s-designer-3" data-act="06" data-label="designer_enc — decisión">
+      <div class="narrative-inner">
+        <p class="narrative-big reveal">Pasar el CV no alcanza</p>
+        <span class="narrative-chip reveal">descartada</span>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         S8 — MODELO FINAL — 08
+    ══════════════════════════════════════════════════════════ -->
+    <section class="section step" id="s-modelo-final" data-act="08" data-label="Modelo final — métricas">
+      <div class="container">
+
+        <div class="section-header reveal">
+          <span class="section-num">08</span>
+          <h2 class="section-title">Modelo final</h2>
+        </div>
+
+        <div class="counter-trio reveal">
+          <div class="stat">
+            <span class="stat-num countup" data-target="0.6368" data-decimals="2">0</span>
+            <span class="stat-label">RMSE holdout</span>
+            <span class="stat-detail">error típico &middot; √media((real−pred)²)</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num countup" data-target="0.4654" data-decimals="2">0</span>
+            <span class="stat-label">MAE holdout</span>
+            <span class="stat-detail">error promedio absoluto &middot; media(|real−pred|)</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num countup" data-target="0.3010" data-decimals="2">0</span>
+            <span class="stat-label">R² holdout</span>
+            <span class="stat-detail">varianza explicada &middot; 1 − error²/varianza del target</span>
+          </div>
+        </div>
+
+        <p class="impact-line reveal">
+          Lo que hace fenómeno a Catan no está en su ficha técnica
+        </p>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         S8b — MODELO FINAL: IMPORTANCIAS — continúa el acto 08
+    ══════════════════════════════════════════════════════════ -->
+    <section class="section step" id="s-modelo-final-importances" data-act="08" data-label="Modelo final — importancias">
+      <div class="container">
+
+        <div class="section-header reveal">
+          <span class="section-num">08</span>
+          <h2 class="section-title">¿Qué mira el modelo?</h2>
+        </div>
+
+        <div class="bar-rows reveal" id="bars-importances"></div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         S9 — LIMITACIONES Y CIERRE — 09
+    ══════════════════════════════════════════════════════════ -->
+    <section class="section step" id="s-cierre" data-act="09" data-label="Limitaciones y cierre">
+      <div class="container">
+
+        <div class="section-header reveal">
+          <span class="section-num">09</span>
+          <h2 class="section-title">Limitaciones y cierre</h2>
+        </div>
+
+        <ul class="criteria-list reveal">
+          <li><span class="criteria-icon" aria-hidden="true">—</span> Solo juegos publicados</li>
+          <li><span class="criteria-icon" aria-hidden="true">—</span> Rating no es ventas</li>
+          <li><span class="criteria-icon" aria-hidden="true">—</span> Falta tuning con Optuna</li>
+          <li><span class="criteria-icon" aria-hidden="true">—</span> Sin embeddings de texto</li>
+        </ul>
+
+        <p class="impact-line reveal">33% menos error que el promedio ingenuo</p>
+        <p class="impact-line reveal">La complejidad importa más que la fecha</p>
+        <p class="impact-line reveal">Validar en el futuro cambia todo</p>
+
+        <a class="btn-repo reveal" href="https://github.com/RamonEppens/Examen-final-AP-Eppens" target="_blank" rel="noopener">
+          Ver repositorio
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+            <line x1="3" y1="10" x2="10" y2="3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <polyline points="4,3 10,3 10,9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         ANEXO — material de respaldo
+    ══════════════════════════════════════════════════════════ -->
+    <section class="section step section--anexo" id="s-anexo" data-act="anexo" data-label="Anexo — material de respaldo">
+      <div class="container" style="max-width:860px;">
+
+        <details class="annex">
+          <summary>
+            <span>Anexo — material de respaldo</span>
+            <svg class="annex-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <polyline points="5,3 11,8 5,13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </summary>
+
+          <div class="annex-body">
+
+            <div class="annex-block">
+              <p class="annex-block__title">Protocolo detallado</p>
+              <div class="method-stack">
+                <div class="method-block">
+                  <h3 class="method-block__title">Target y restricciones</h3>
+                  <p class="method-block__text">
+                    Variable objetivo: <code>average</code>, escala continua 1–10. Prohibidas como
+                    features por leakage: <code>bayes_average</code>, <code>rank</code>, <code>users_rated</code>.
+                  </p>
+                </div>
+                <div class="method-block">
+                  <h3 class="method-block__title">Features (92 en total)</h3>
+                  <ul class="method-list">
+                    <li><strong>Numéricas (10):</strong> weight, year, jugadores, duración, min_age, unlimited_players, n_mechanics, n_categories</li>
+                    <li><strong>Mecánicas:</strong> binarización multilabel top&#8209;40</li>
+                    <li><strong>Categorías:</strong> binarización multilabel top&#8209;30</li>
+                    <li><strong>Ronda 2:</strong> playtime_ratio, players_range, 10 familias de mecánicas</li>
+                    <li>NaN sin imputar para árboles; mediana en pipeline para modelos lineales</li>
+                  </ul>
+                </div>
+                <div class="method-block">
+                  <h3 class="method-block__title">Protocolo de evaluación</h3>
+                  <ul class="method-list">
+                    <li>Métrica principal: <strong>RMSE</strong>; se reportan también MAE y R²</li>
+                    <li>Desarrollo: KFold k=5, shuffle=True, seed=42, sobre year ≤ 2023</li>
+                    <li>Holdout temporal 2024–2026 evaluado una sola vez, al final</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="annex-block">
+              <p class="annex-block__title">Comparativa de modelos (detalle)</p>
+              <div class="table-scroll">
+                <div class="results-table">
+                  <div class="table-row table-row--header">
+                    <span>Modelo</span><span>RMSE CV</span><span>MAE</span><span>R²</span>
+                  </div>
+                  <div class="table-row table-row--best">
+                    <span class="model-name">LightGBM</span><span class="rmse-best">0.5698</span><span>0.4260</span><span>0.556</span>
+                  </div>
+                  <div class="table-row">
+                    <span class="model-name">XGBoost</span><span>0.5698</span><span>0.4268</span><span>0.556</span>
+                  </div>
+                  <div class="table-row">
+                    <span class="model-name">Random Forest</span><span>0.5775</span><span>0.4311</span><span>0.545</span>
+                  </div>
+                  <div class="table-row">
+                    <span class="model-name">Lasso / Ridge</span><span>0.6222</span><span>0.4683</span><span>0.471</span>
+                  </div>
+                  <div class="table-row table-row--baseline">
+                    <span class="model-name">Baseline — media constante</span><span>0.8559</span><span>0.6685</span><span>≈&nbsp;0</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="annex-block">
+              <p class="annex-block__title">Experimentos de feature engineering — ronda 2</p>
+              <div class="table-scroll">
+                <div class="results-table">
+                  <div class="table-row table-row--header">
+                    <span>Configuración</span><span>RMSE CV</span><span>Δ</span><span>Estado</span>
+                  </div>
+                  <div class="table-row">
+                    <span class="model-name">[BASE] LightGBM (80 features)</span><span>0.5698</span><span>—</span><span>—</span>
+                  </div>
+                  <div class="table-row">
+                    <span class="model-name">+ playtime_ratio</span><span>0.5691</span><span>−0.0007</span><span>incluida</span>
+                  </div>
+                  <div class="table-row">
+                    <span class="model-name">+ players_range</span><span>0.5687</span><span>−0.0012</span><span>incluida</span>
+                  </div>
+                  <div class="table-row">
+                    <span class="model-name">+ 10 familias mecánicas</span><span>0.5689</span><span>−0.0009</span><span>incluida</span>
+                  </div>
+                  <div class="table-row">
+                    <span class="model-name">+ weight × max_playtime</span><span>0.5700</span><span>+0.0002</span><span>descartada</span>
+                  </div>
+                  <div class="table-row">
+                    <span class="model-name">+ F1+F2+F3+F4+weight²</span><span>0.5706</span><span>+0.0007</span><span>descartada</span>
+                  </div>
+                  <div class="table-row">
+                    <span class="model-name">+ F2+F3+F4+designer_enc</span><span>0.5540</span><span>−0.0158</span><span>descartada (holdout +0.089)</span>
+                  </div>
+                  <div class="table-row">
+                    <span class="model-name">+ weight_missing flag</span><span>0.5684</span><span>−0.0002</span><span>descartada (Δ&lt;0.0005)</span>
+                  </div>
+                  <div class="table-row table-row--final">
+                    <span class="model-name">FINAL: base + F2+F3+F4 (92 features)</span><span>0.5686</span><span>−0.0012</span><span>MODELO FINAL</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="annex-block">
+              <p class="annex-block__title">designer_enc — cobertura por grupo (holdout)</p>
+              <div class="table-scroll">
+                <div class="results-table">
+                  <div class="table-row table-row--header">
+                    <span>Grupo</span><span>N (%)</span><span>RMSE base</span><span>RMSE +enc</span>
+                  </div>
+                  <div class="table-row">
+                    <span class="model-name">Todos conocidos</span><span>1.388 (61,9%)</span><span>0.6166</span><span>0.6049</span>
+                  </div>
+                  <div class="table-row">
+                    <span class="model-name">Parcial</span><span>192 (8,6%)</span><span>0.7163</span><span>0.7168</span>
+                  </div>
+                  <div class="table-row">
+                    <span class="model-name">Ninguno conocido</span><span>661 (29,5%)</span><span>0.6372</span><span>0.9159</span>
+                  </div>
+                </div>
+              </div>
+              <p class="annex-block__note">
+                El 29,5% del holdout son diseñadores nunca vistos en train: ahí el modelo con
+                designer_enc pasa de 0,64 a 0,92 de RMSE.
+              </p>
+            </div>
+
+            <div class="annex-block">
+              <p class="annex-block__title">Sensibilidad del filtro de votos</p>
+              <div class="table-scroll">
+                <div class="results-table">
+                  <div class="table-row table-row--header table-row--cols3">
+                    <span>≥ votos</span><span>N juegos</span><span>% retenido</span>
+                  </div>
+                  <div class="table-row table-row--cols3"><span>1</span><span>30.373</span><span>100,0%</span></div>
+                  <div class="table-row table-row--cols3"><span>10</span><span>30.373</span><span>100,0%</span></div>
+                  <div class="table-row table-row--cols3"><span>20</span><span>30.373</span><span>100,0%</span></div>
+                  <div class="table-row table-row--cols3"><span>30</span><span>30.369</span><span>100,0%</span></div>
+                  <div class="table-row table-row--cols3 table-row--best"><span>50 (elegido)</span><span>24.251</span><span>79,8%</span></div>
+                  <div class="table-row table-row--cols3"><span>75</span><span>19.877</span><span>65,4%</span></div>
+                  <div class="table-row table-row--cols3"><span>100</span><span>17.138</span><span>56,4%</span></div>
+                  <div class="table-row table-row--cols3"><span>150</span><span>13.885</span><span>45,7%</span></div>
+                  <div class="table-row table-row--cols3"><span>200</span><span>11.764</span><span>38,7%</span></div>
+                  <div class="table-row table-row--cols3"><span>500</span><span>6.779</span><span>22,3%</span></div>
+                </div>
+              </div>
+              <p class="annex-block__note">
+                El salto grande está en 50 votos — la semilla (ranking) ya excluye juegos con muy pocos votos.
+              </p>
+            </div>
+
+            <div class="annex-block">
+              <p class="annex-block__title">Correlación (Spearman) feature ↔ rating</p>
+              <div class="table-scroll">
+                <div class="results-table">
+                  <div class="table-row table-row--header table-row--cols2">
+                    <span>Feature</span><span>ρ</span>
+                  </div>
+                  <div class="table-row table-row--cols2 table-row--best"><span class="model-name">weight</span><span class="rmse-best">+0.549</span></div>
+                  <div class="table-row table-row--cols2"><span class="model-name">year</span><span>+0.432</span></div>
+                  <div class="table-row table-row--cols2"><span class="model-name">n_mechanics</span><span>+0.430</span></div>
+                  <div class="table-row table-row--cols2"><span class="model-name">max_playtime</span><span>+0.382</span></div>
+                  <div class="table-row table-row--cols2"><span class="model-name">min_age</span><span>+0.359</span></div>
+                  <div class="table-row table-row--cols2"><span class="model-name">min_players</span><span>−0.290</span></div>
+                  <div class="table-row table-row--cols2"><span class="model-name">min_playtime</span><span>+0.254</span></div>
+                  <div class="table-row table-row--cols2"><span class="model-name">max_players</span><span>−0.226</span></div>
+                  <div class="table-row table-row--cols2"><span class="model-name">n_categories</span><span>+0.104</span></div>
+                </div>
+              </div>
+              <p class="annex-block__note">year × weight: ρ = 0,017 (≈ 0) — motiva la frase "los juegos modernos no son más complejos".</p>
+            </div>
+
+            <div class="annex-block">
+              <p class="annex-block__title">Top mecánicas por frecuencia</p>
+              <div class="bar-rows" id="bars-mechanics-annex"></div>
+            </div>
+
+          </div>
+        </details>
+
+        <footer class="page-footer reveal">
+          <p>Ramón Eppens &middot; Análisis Predictivo &middot; ITBA &middot; 2026</p>
+          <p class="footer-sub">
+            Dataset: BoardGameGeek XMLAPI2 &middot; Modelo: LightGBM &middot; RMSE holdout: 0.6368
+          </p>
+        </footer>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script src="data/dataset_pipeline.js"></script>
+  <script src="data/sample_row.js"></script>
+  <script src="data/eda_target.js"></script>
+  <script src="data/eda_features.js"></script>
+  <script src="data/model_selection.js"></script>
+  <script src="data/designer_enc.js"></script>
+  <script src="data/model_final.js"></script>
+  <script src="data/evaluation.js"></script>
+  <script src="data/annex.js"></script>
+  <script src="charts.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

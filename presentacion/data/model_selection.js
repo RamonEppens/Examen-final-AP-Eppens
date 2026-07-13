@@ -1,0 +1,2 @@
+// Generado desde notebooks -- no editar a mano
+window.DATA_MODEL_SELECTION = {"ladder": [{"name": "Media constante", "rmse": 0.8559, "std": 0.0064, "tag": "baseline"}, {"name": "Lineal simple", "rmse": 0.6469, "std": 0.0058, "tag": "baseline"}, {"name": "Ridge / Lasso", "rmse": 0.6222, "std": 0.0071, "tag": "linear"}, {"name": "Random Forest", "rmse": 0.5775, "std": 0.0051, "tag": "tree"}, {"name": "LightGBM", "rmse": 0.5698, "std": 0.0054, "tag": "final"}]};
