@@ -75,7 +75,8 @@ python src/build_dataset.py
 
 | Archivo | Descripción |
 |---|---|
-| `data/processed/bgg_games.csv` | Dataset final limpio |
+| `data/processed/bgg_games_clean.csv` | Dataset final limpio (24.251 juegos) — insumo de los notebooks |
+| `data/processed/bgg_games.csv` | Dataset crudo completo (30.752 juegos), previo al filtro de votos |
 | `notebooks/03_train_final.ipynb` | Entrenamiento y serialización del modelo |
 | `notebooks/04_predict_test.ipynb` | Predicciones sobre el conjunto de test |
 | `models/` | Modelo serializado con joblib |
